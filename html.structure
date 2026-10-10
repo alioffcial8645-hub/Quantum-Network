@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Network | Secure Explorer</title>
+    <!-- Styles go here -->
+</head>
+<body data-theme="dark">
+
+    <!-- Auth Lock Screen -->
+    <div id="auth-overlay">
+        <div class="auth-box">
+            <div class="auth-logo"><div class="auth-logo-inner"></div></div>
+            <h2>Quantum Network</h2>
+            <p>Enter passcode to unlock secure browsing workspace</p>
+            <input type="password" id="passcode-input" class="auth-input" placeholder="Passcode">
+            <button class="auth-btn" onclick="unlockApp()">Unlock Workspace</button>
+        </div>
+    </div>
+
+    <!-- Main Browser Application -->
+    <div id="app-workspace">
+        
+        <!-- Tab Bar -->
+        <div class="top-bar">
+            <div class="tab-bar" id="tab-container">
+                <div class="tab active" onclick="switchTab(0)" id="tab-0">
+                    <span>New Tab</span>
+                    <span class="tab-close" onclick="closeTab(event, 0)">×</span>
+                </div>
+            </div>
+            <button class="new-tab-btn" onclick="createNewTab()">+</button>
+        </div>
+
+        <!-- Navigation Toolbar -->
+        <div class="nav-toolbar">
+            <button class="nav-icon-btn" onclick="reloadActiveTab()">&#8635;</button>
+            <button class="nav-icon-btn" onclick="goHome()">&#8962;</button>
+            
+            <div class="address-bar-container">
+                <input type="text" id="main-address-bar" placeholder="Search the web or enter a URL" onkeydown="handleAddressSubmit(event)">
+            </div>
+
+            <div class="controls-group">
+                <select class="select-custom" id="search-engine-select">
+                    <option value="google">Google</option>
+                    <option value="duckduckgo">DuckDuckGo</option>
+                    <option value="bing">Bing</option>
+                </select>
+                <select class="select-custom" onchange="changeTheme(this.value)">
+                    <option value="dark">Dark Theme</option>
+                    <option value="emerald">Emerald</option>
+                    <option value="purple">Cyber Purple</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Viewport Container -->
+        <div class="viewport-area" id="viewport-container">
+            
+            <!-- Home Screen -->
+            <div class="home-landing" id="home-screen">
+                <div class="home-diamond"><div class="home-diamond-inner"></div></div>
+                <h1 class="home-title">A quieter way to explore.</h1>
+                <p class="home-subtitle">The web, with room to breathe.</p>
+                
+                <div class="search-box-large">
+                    <input type="text" id="home-search-input" placeholder="Search the web or enter a URL..." onkeydown="handleHomeSubmit(event)">
+                    <button onclick="executeHomeSearch()">Explore</button>
+                </div>
+
+                <div class="shortcuts-row">
+                    <div class="shortcut-chip" onclick="quickNavigate('https://wikipedia.org')">Wikipedia</div>
+                    <div class="shortcut-chip" onclick="quickNavigate('https://github.com')">GitHub</div>
+                    <div class="shortcut-chip" onclick="quickNavigate('https://archive.org')">Internet Archive</div>
+                </div>
+
+                <div class="footer-note">Your browsing session is active. Encrypted sandbox proxy portal.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript goes here -->
+</body>
+</html>
