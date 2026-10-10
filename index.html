@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Network | Secure Explorer</title>
+    <link rel="preconnect" href="https://html.duckduckgo.com">
+    <link rel="preconnect" href="https://www.bing.com">
+    <link rel="dns-prefetch" href="https://m.wikipedia.org">
+    
+    <style>
+        :root {
+            --bg-primary: #0b0f17;
+            --bg-secondary: #131b2e;
+            --bg-card: #1e293b;
+            --bg-hover: #2e3d52;
+            --accent-cyan: #3b82f6;
+            --accent-blue: #2563eb;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #2e3d52;
+            --border-glow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --radius-main: 12px;
+            --custom-bg-image: none;
+        }
+
+        [data-theme="amber"] {
+            --bg-primary: #121212;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #252525;
+            --bg-hover: #333333;
+            --accent-cyan: #d4af37;
+            --accent-blue: #b8860b;
+            --accent-glow: rgba(212, 175, 55, 0.12);
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border-color: #333333;
+        }
+
+        [data-theme="emerald"] {
+            --bg-primary: #0a1210;
+            --bg-secondary: #12201c;
+            --bg-card: #1b2e28;
+            --bg-hover: #263e37;
+            --accent-cyan: #10b981;
+            --accent-blue: #059669;
+            --accent-glow: rgba(16, 185, 129, 0.12);
+            --text-main: #ecfdf5;
+            --text-muted: #86efac;
+            --border-color: #24423a;
+        }
+
+        [data-theme="crimson"] {
+            --bg-primary: #120f11;
+            --bg-secondary: #1d171a;
+            --bg-card: #2b2126;
+            --bg-hover: #3d2f36;
+            --accent-cyan: #f43f5e;
+            --accent-blue: #e11d48;
+            --accent-glow: rgba(244, 63, 94, 0.12);
+            --text-main: #fdf2f4;
+            --text-muted: #fda4af;
+            --border-color: #3d2f36;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        
+        body { 
+            background: var(--bg-primary); 
+            background-image: var(--custom-bg-image); 
+            background-size: cover; 
+            background-position: center; 
+            color: var(--text-main); 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+            transition: all 0.2s ease; 
+        }
+
+        /* Upgraded Luxury Passcode Screen */
+        #auth-overlay { 
+            position: fixed; 
+            inset: 0; 
+            background: var(--bg-primary); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 1000; 
+            backdrop-filter: blur(8px);
+        }
+        
+        .auth-box { 
+            background: var(--bg-secondary); 
+            padding: 40px 30px; 
+            border-radius: var(--radius-main); 
+            border: 1px solid var(--border-color); 
+            text-align: center; 
+            width: 90%; 
+            max-width: 400px; 
+            box-shadow: var(--border-glow); 
+        }
+
+        .auth-logo { 
+            width: 52px; 
+            height: 52px; 
+            margin: 0 auto 18px; 
+            border: 2px solid var(--accent-cyan); 
+            border-radius: 12px;
+            transform: rotate(45deg); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background: var(--bg-card);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .auth-logo-inner { 
+            width: 18px; 
+            height: 18px; 
+            background: var(--accent-cyan); 
+            border-radius: 4px;
+        }
+
+        .auth-box h2 { font-size: 24px; margin-bottom: 8px; font-weight: 600; letter-spacing: -0.5px; }
+        .auth-box p { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.4; }
+        
+        .auth-input { 
+            width: 100%; 
+            padding: 14px; 
+            background: var(--bg-primary); 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            color: var(--text-main); 
+            text-align: center; 
+            font-size: 16px; 
+            letter-spacing: 2px;
+            margin-bottom: 14px; 
+            outline: none; 
+            transition: all 0.2s;
+        }
+        
+        .auth-input:focus { 
+            border-color: var(--accent-cyan); 
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        
+        .auth-btn { 
+            width: 100%; 
+            padding: 14px; 
+            background: var(--accent-cyan); 
+            border: none; 
+            border-radius: 8px; 
+            color: #0b0f17; 
+            font-weight: 700; 
+            font-size: 14px;
+            cursor: pointer; 
+            transition: opacity 0.2s;
+        }
+
+        .auth-btn:hover { opacity: 0.9; }
+
+        .browser-container { display: flex; flex: 1; height: 100vh; overflow: hidden; }
+        
+        .sidebar { 
+            width: 60px; 
+            background: var(--bg-secondary); 
+            border-right: 1px solid var(--border-color); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 12px 0; 
+            gap: 15px; 
+            z-index: 100; 
+        }
+
+        .sidebar-icon { 
+            width: 36px; 
+            height: 36px; 
+            border-radius: 8px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: var(--text-muted); 
+            background: var(--bg-primary); 
+            border: 1px solid var(--border-color); 
+            cursor: pointer; 
+            font-size: 16px; 
+            transition: all 0.2s; 
+        }
+
+        .sidebar-icon:hover { 
+            color: var(--accent-cyan); 
+            border-color: var(--accent-cyan); 
+            background: var(--bg-hover); 
+        }
+
+        .main-content-area { display: flex; flex-direction: column; flex: 1; height: 100vh; overflow: hidden; }
+
+        #settings-drawer { 
+            position: fixed; 
+            top: 0; 
+            left: 60px; 
+            width: 340px; 
+            height: 100vh; 
+            background: var(--bg-secondary); 
+            border-right: 1px solid var(--border-color); 
+            box-shadow: 5px 0 25px rgba(0,0,0,0.5); 
+            z-index: 1500; 
+            display: none; 
+            flex-direction: column; 
+            padding: 20px; 
+            overflow-y: auto; 
+        }
+
+        #settings-drawer h3 { color: var(--accent-cyan); margin-bottom: 20px; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
+        .settings-section { margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
+        .settings-section h4 { font-size: 13px; color: var(--text-main); margin-bottom: 10px; font-weight: 600; }
+        
+        .form-group { margin-bottom: 12px; text-align: left; }
+        .form-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none; font-size: 12px; }
+
+        .extension-row { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+        .history-box { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px; max-height: 90px; overflow-y: auto; font-size: 11px; color: var(--text-muted); text-align: left; }
+
+        #app-workspace { display: none; flex-direction: column; height: 100vh; flex: 1; }
+        
+        .top-bar { background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: 8px 16px; display: flex; align-items: center; gap: 12px; }
+        .tab-bar { display: flex; gap: 6px; flex: 1; overflow-x: auto; }
+        .tab { background: var(--bg-primary); padding: 6px 14px; border-radius: 6px; font-size: 12px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border-color); cursor: pointer; min-width: 120px; max-width: 180px; }
+        .tab.active { background: var(--bg-hover); border-color: var(--accent-cyan); color: var(--accent-cyan); }
+        .tab-close { margin-left: auto; cursor: pointer; opacity: 0.6; }
+        .tab-close:hover { opacity: 1; }
+        .new-tab-btn { background: none; border: 1px solid var(--border-color); color: var(--text-muted); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; }
+
+        .bookmarks-bar { background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: 4px 16px; display: flex; align-items: center; gap: 8px; overflow-x: auto; font-size: 12px; }
+        .bookmark-item { color: var(--text-muted); background: var(--bg-primary); border: 1px solid var(--border-color); padding: 2px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+        .bookmark-item img { width: 12px; height: 12px; }
+        .bookmark-item:hover { color: var(--accent-cyan); border-color: var(--accent-cyan); }
+        .add-bookmark-btn { color: var(--accent-cyan); background: none; border: none; cursor: pointer; font-weight: bold; padding: 2px 6px; }
+
+        .nav-toolbar { background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: 8px 16px; display: flex; align-items: center; gap: 10px; }
+        .nav-icon-btn { background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; padding: 6px; border-radius: 6px; }
+        .nav-icon-btn:hover { background: var(--bg-hover); color: var(--text-main); }
+        .address-bar-container { flex: 1; display: flex; align-items: center; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 20px; padding: 4px 14px; }
+        .address-bar-container input { flex: 1; background: none; border: none; color: var(--text-main); font-size: 13px; outline: none; padding: 4px; }
+        
+        .controls-group { display: flex; gap: 8px; align-items: center; }
+        .select-custom { background: var(--bg-primary); color: var(--text-muted); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 6px; font-size: 12px; outline: none; }
+
+        .viewport-area { flex: 1; position: relative; width: 100%; height: 100%; }
+        .web-frame { width: 100%; height: 100%; border: none; background: var(--bg-primary); display: none; filter: invert(0.9) hue-rotate(180deg) brightness(0.95); }
+        .web-frame.active { display: block; }
+
+        .home-landing { position: absolute; inset: 0; background: rgba(11, 15, 23, 0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; backdrop-filter: blur(6px); }
+        .home-diamond { width: 60px; height: 60px; border: 2px solid var(--accent-cyan); border-radius: 12px; transform: rotate(45deg); display: flex; align-items: center; justify-content: center; margin-bottom: 25px; background: var(--bg-card); box-shadow: 0 0 20px var(--accent-glow); }
+        .home-diamond-inner { width: 20px; height: 20px; background: var(--accent-cyan); border-radius: 4px; }
+        .home-title { font-size: 32px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.5px; }
+        .home-subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
+        
+        .mode-toggles { display: flex; gap: 15px; margin-bottom: 15px; font-size: 13px; color: var(--text-muted); align-items: center; }
+        .mode-toggles label { cursor: pointer; display: flex; gap: 5px; align-items: center; }
+
+        .search-box-large { display: flex; width: 100%; max-width: 580px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-main); padding: 8px 12px; gap: 10px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+        .search-box-large input { flex: 1; background: none; border: none; outline: none; color: var(--text-main); font-size: 15px; padding: 6px 8px; }
+        .search-box-large button { background: var(--accent-cyan); border: none; padding: 10px 20px; border-radius: 8px; color: #0b0f17; font-weight: 700; cursor: pointer; }
+        
+        .shortcuts-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 15px; }
+        .shortcut-chip { background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 20px; font-size: 13px; color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; }
+        .shortcut-chip img { width: 16px; height: 16px; }
+        .shortcut-chip:hover { border-color: var(--accent-cyan); color: var(--text-main); background: var(--bg-hover); }
+        
+        .footer-note { position: absolute; bottom: 15px; color: var(--text-muted); font-size: 11px; }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div id="auth-overlay">
+        <div class="auth-box">
+            <div class="auth-logo"><div class="auth-logo-inner"></div></div>
+            <h2>Quantum Network</h2>
+            <p>Secure authentication required</p>
+            <input type="password" id="passcode-input" class="auth-input" placeholder="••••••••••••">
+            <button class="auth-btn" onclick="unlockApp()">Unlock Workspace</button>
+        </div>
+    </div>
+
+    <div class="browser-container" id="app-workspace" style="display: none;">
+        
+        <div class="sidebar">
+            <div class="sidebar-icon" onclick="goHome()" title="Home">🏠</div>
+            <div class="sidebar-icon" onclick="toggleSettingsDrawer()" title="Settings & Themes">⚙️</div>
+            <div class="sidebar-icon" onclick="openDevModal()" title="Developer Tools">🛠️</div>
+        </div>
+
+        <div id="settings-drawer">
+            <h3>⚙️ Browser Settings <span style="cursor:pointer;" onclick="toggleSettingsDrawer()">×</span></h3>
+            
+            <div class="settings-section">
+                <h4>🎨 Theme & Appearance</h4>
+                <div class="form-group">
+                    <label>Preset Theme</label>
+                    <select id="modal-theme-select" onchange="changeTheme(this.value)">
+                        <option value="dark">Slate Blue</option>
+                        <option value="amber">Warm Amber</option>
+                        <option value="emerald">Deep Emerald</option>
+                        <option value="crimson">Crimson Slate</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Accent Color</label>
+                    <input type="color" id="accent-color-picker" value="#3b82f6" onchange="updateAccentColor(this.value)">
+                </div>
+                <div class="form-group">
+                    <label>Custom Wallpaper URL</label>
+                    <input type="text" id="bg-url-input" placeholder="Paste image URL..." oninput="updateWallpaper(this.value)">
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h4>🧩 Extensions & Add-Ons</h4>
+                <div class="extension-row">
+                    <span>Ad-Blocker</span>
+                    <input type="checkbox" id="ext-adblock" onchange="toggleExtension('adblock', this.checked)">
+                </div>
+                <div class="extension-row">
+                    <span>Dark Reader Mode</span>
+                    <input type="checkbox" id="ext-darkmode" onchange="toggleExtension('darkmode', this.checked)">
+                </div>
+                <div class="extension-row">
+                    <span>Privacy Shield</span>
+                    <input type="checkbox" id="ext-privacy" onchange="toggleExtension('privacy', this.checked)">
+                </div>
+            </div>
+
+            <div class="settings-section" id="dev-section" style="display:none;">
+                <h4>🛠️ Developer Controls</h4>
+                <div class="form-group">
+                    <label>Update Browser Passcode</label>
+                    <input type="text" id="new-passcode-field" placeholder="New passcode">
+                </div>
+                <button onclick="updatePasscode()" style="width:100%; padding:8px; margin-bottom:10px; border-radius:6px; border:none; background:var(--accent-cyan); color:#0b0f17; font-weight:bold; cursor:pointer;">Save Passcode</button>
+                <div class="form-group">
+                    <label>History Log</label>
+                    <div class="history-box" id="dev-history-log">No history recorded.</div>
+                </div>
+                <button onclick="resetBrowserData()" style="width:100%; padding:8px; margin-top:10px; border-radius:6px; border:none; background:#ff4444; color:#fff; font-weight:bold; cursor:pointer;">Factory Reset</button>
+            </div>
+        </div>
+
+        <div class="main-content-area">
+            <div class="top-bar">
+                <div class="tab-bar" id="tab-container">
+                    <div class="tab active" onclick="switchTab(0)" id="tab-0">
+                        <span>New Tab</span>
+                        <span class="tab-close" onclick="closeTab(event, 0)">×</span>
+                    </div>
+                </div>
+                <button class="new-tab-btn" onclick="createNewTab()">+</button>
+            </div>
+
+            <div class="bookmarks-bar" id="bookmarks-container">
+                <span style="color: var(--text-muted); font-weight: bold;">Bookmarks:</span>
+                <button class="add-bookmark-btn" onclick="addCurrentBookmark()">+ Bookmark Current</button>
+            </div>
+
+            <div class="nav-toolbar">
+                <button class="nav-icon-btn" onclick="reloadActiveTab()">&#8635;</button>
+                <button class="nav-icon-btn" onclick="goHome()">&#8962;</button>
+                
+                <div class="address-bar-container">
+                    <input type="text" id="main-address-bar" placeholder="Search the web or enter a URL" onkeydown="handleAddressSubmit(event)">
+                </div>
+
+                <div class="controls-group">
+                    <select class="select-custom" id="search-engine-select">
+                        <option value="duckduckgo">DuckDuckGo</option>
+                        <option value="bing">Bing</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="viewport-area" id="viewport-container">
+                <div class="home-landing" id="home-screen">
+                    <div class="home-diamond"><div class="home-diamond-inner"></div></div>
+                    <h1 class="home-title">Quantum Network</h1>
+                    <p class="home-subtitle">The web, with room to breathe.</p>
+                    
+                    <div class="mode-toggles">
+                        <label><input type="checkbox" id="incognito-checkbox"> Incognito Mode</label>
+                    </div>
+
+                    <div class="search-box-large">
+                        <input type="text" id="home-search-input" placeholder="Search the web or enter a URL..." onkeydown="handleHomeSubmit(event)">
+                        <button onclick="executeHomeSearch()">Explore</button>
+                    </div>
+
+         
