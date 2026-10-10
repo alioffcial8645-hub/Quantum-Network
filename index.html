@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Network | Secure Portal</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        h1 {
+            color: #58a6ff;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        p {
+            color: #8b949e;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #c9d1d9;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #58a6ff;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #238636;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #2ea043;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #error-msg {
+            color: #f85149;
+            margin-top: 15px;
+            font-size: 0.85rem;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100vh;
+            border: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Access Lock Section -->
+    <div id="auth-box" class="container">
+        <h1>Quantum Network</h1>
+        <p>Enter authorization code to open the portal.</p>
+        
+        <div class="input-group">
+            <label for="passcode">Master Passcode</label>
+            <input type="password" id="passcode" placeholder="Enter code...">
+        </div>
+
+        <button onclick="authenticate()">Access Portal</button>
+        <div id="error-msg"></div>
+    </div>
+
+    <!-- Main Proxy View Section -->
+    <div id="proxy-box" class="container hidden">
+        <h1>Quantum Proxy</h1>
+        <p>Enter any URL to load inside the secure frame.</p>
+
+        <div class="input-group">
+            <label for="target-url">Target Web Address</label>
+            <input type="text" id="target-url" placeholder="https://example.com">
+        </div>
+
+        <button onclick="launchProxy()">Launch Webpage</button>
+    </div>
+
+    <!-- Proxy Display View -->
+    <iframe id="proxy-frame" class="hidden"></iframe>
+
+    <script>
+        const AUTH_KEY = "ALI_GATE_NET";
+        const PROXY_PREFIX = window.location.origin.includes('localhost') ? "http://localhost:8080/service/" : "https://your-backend-app.onrender.com/service/";
+
+        function authenticate() {
+            const input = document.getElementById('passcode').value;
+            const error = document.getElementById('error-msg');
+
+            if (input === AUTH_KEY) {
+                document.getElementById('auth-box').classList.add('hidden');
+                document.getElementById('proxy-box').classList.remove('hidden');
+            } else {
+                error.textContent = "Invalid passcode. Access denied.";
+            }
+        }
+
+        function launchProxy() {
+            let url = document.getElementById('target-url').value.trim();
+            if (!url) return;
+
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+
+            const proxyUrl = PROXY_PREFIX + encodeURIComponent(url);
+            const frame = document.getElementById('proxy-frame');
+
+            document.getElementById('proxy-box').classList.add('hidden');
+            frame.classList.remove('hidden');
+            frame.src = proxyUrl;
+        }
+    </script>
+</body>
+</html>
