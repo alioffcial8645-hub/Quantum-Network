@@ -1,0 +1,156 @@
+const PASSCODE = "ALI_GATE_NET";
+let tabs = [{ id: 0, url: 'home', title: 'New Tab' }];
+let activeTabId = 0;
+let tabCounter = 1;
+
+function unlockApp() {
+    const input = document.getElementById('passcode-input').value;
+    if (input === PASSCODE) {
+        document.getElementById('auth-overlay').style.display = 'none';
+        document.getElementById('app-workspace').style.display = 'flex';
+        loadSession();
+    } else {
+        alert('Incorrect Passcode');
+    }
+}
+
+document.getElementById('passcode-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') unlockApp(); });
+
+function executeHomeSearch() {
+    const query = document.getElementById('home-search-input').value.trim();
+    if (query) navigateActiveTab(query);
+}
+
+function handleHomeSubmit(e) { if (e.key === 'Enter') executeHomeSearch(); }
+function handleAddressSubmit(e) { if (e.key === 'Enter') navigateActiveTab(e.target.value.trim()); }
+
+function navigateActiveTab(input) {
+    const engine = document.getElementById('search-engine-select').value;
+    let targetUrl = input;
+
+    if (!input.startsWith('http://') && !input.startsWith('https://')) {
+        if (input.includes('.') && !input.includes(' ')) {
+            targetUrl = 'https://' + input;
+        } else {
+            if (engine === 'google') targetUrl = `https://www.google.com/search?q=${encodeURIComponent(input)}&igu=1`;
+            else if (engine === 'duckduckgo') targetUrl = `https://duckduckgo.com/?q=${encodeURIComponent(input)}`;
+            else targetUrl = `https://www.bing.com/search?q=${encodeURIComponent(input)}`;
+        }
+    }
+
+    const currentTab = tabs.find(t => t.id === activeTabId);
+    currentTab.url = targetUrl;
+    currentTab.title = input.length > 15 ? input.substring(0, 12) + '...' : input;
+
+    renderTabs();
+    renderViewport();
+    saveSession();
+}
+
+function quickNavigate(url) {
+    document.getElementById('home-search-input').value = url;
+    navigateActiveTab(url);
+}
+
+function createNewTab() {
+    const newId = tabCounter++;
+    tabs.push({ id: newId, url: 'home', title: 'New Tab' });
+    activeTabId = newId;
+    renderTabs();
+    renderViewport();
+    saveSession();
+}
+
+function switchTab(id) {
+    activeTabId = id;
+    renderTabs();
+    renderViewport();
+}
+
+function closeTab(e, id) {
+    e.stopPropagation();
+    if (tabs.length === 1) return;
+    tabs = tabs.filter(t => t.id !== id);
+    if (activeTabId === id) activeTabId = tabs[tabs.length - 1].id;
+    renderTabs();
+    renderViewport();
+    saveSession();
+}
+
+function renderTabs() {
+    const container = document.getElementById('tab-container');
+    container.innerHTML = tabs.map(t => `
+        <div class="tab ${t.id === activeTabId ? 'active' : ''}" onclick="switchTab(${t.id})">
+            <span>${t.title}</span>
+            <span class="tab-close" onclick="closeTab(event, ${t.id})">×</span>
+        </div>
+    `).join('');
+}
+
+function renderViewport() {
+    const currentTab = tabs.find(t => t.id === activeTabId);
+    const addressBar = document.getElementById('main-address-bar');
+    const homeScreen = document.getElementById('home-screen');
+    
+    document.querySelectorAll('.web-frame').forEach(f => f.classList.remove('active'));
+
+    if (currentTab.url === 'home') {
+        homeScreen.style.display = 'flex';
+        addressBar.value = '';
+    } else {
+        homeScreen.style.display = 'none';
+        addressBar.value = currentTab.url;
+
+        let frame = document.getElementById(`frame-${currentTab.id}`);
+        if (!frame) {
+            frame = document.createElement('iframe');
+            frame.id = `frame-${currentTab.id}`;
+            frame.className = 'web-frame';
+            document.getElementById('viewport-container').appendChild(frame);
+        }
+        if (frame.src !== currentTab.url) frame.src = currentTab.url;
+        frame.classList.add('active');
+    }
+}
+
+function goHome() {
+    const currentTab = tabs.find(t => t.id === activeTabId);
+    currentTab.url = 'home';
+    currentTab.title = 'New Tab';
+    renderTabs();
+    renderViewport();
+}
+
+function reloadActiveTab() {
+    const currentTab = tabs.find(t => t.id === activeTabId);
+    if (currentTab.url !== 'home') {
+        const frame = document.getElementById(`frame-${currentTab.id}`);
+        if (frame) frame.src = frame.src;
+    }
+}
+
+function changeTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    localStorage.setItem('quantum_theme', theme);
+}
+
+function saveSession() {
+    localStorage.setItem('quantum_tabs', JSON.stringify(tabs));
+    localStorage.setItem('quantum_active', activeTabId);
+}
+
+function loadSession() {
+    const savedTabs = localStorage.getItem('quantum_tabs');
+    const savedActive = localStorage.getItem('quantum_active');
+    const savedTheme = localStorage.getItem('quantum_theme');
+
+    if (savedTheme) changeTheme(savedTheme);
+    if (savedTabs) {
+        tabs = JSON.parse(savedTabs);
+        activeTabId = parseInt(savedActive) || tabs[0].id;
+        tabCounter = Math.max(...tabs.map(t => t.id)) + 1;
+        renderTabs();
+        renderViewport();
+    }
+  }
+      
