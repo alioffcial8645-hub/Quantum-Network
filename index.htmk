@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Network | Secure Explorer</title>
+    <style>
+        :root {
+            --bg-primary: #0a0e14;
+            --bg-secondary: #131822;
+            --bg-hover: #1c2333;
+            --accent-cyan: #00f2fe;
+            --accent-blue: #4facfe;
+            --text-main: #e6edf3;
+            --text-muted: #8b949e;
+            --border-color: #21262d;
+            --radius-main: 12px;
+        }
+
+        [data-theme="emerald"] {
+            --bg-primary: #061412;
+            --bg-secondary: #0b221f;
+            --bg-hover: #12332f;
+            --accent-cyan: #00f5a0;
+            --accent-blue: #00d9f5;
+        }
+
+        [data-theme="purple"] {
+            --bg-primary: #0f0a1c;
+            --bg-secondary: #1a122f;
+            --bg-hover: #261b44;
+            --accent-cyan: #b224ef;
+            --accent-blue: #7579ff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: var(--bg-primary); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: all 0.3s ease; }
+
+        /* Auth Screen */
+        #auth-overlay { position: fixed; inset: 0; background: var(--bg-primary); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .auth-box { background: var(--bg-secondary); padding: 35px; border-radius: var(--radius-main); border: 1px solid var(--border-color); text-align: center; width: 90%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .auth-logo { width: 48px; height: 48px; margin: 0 auto 15px; border: 2px solid var(--accent-cyan); transform: rotate(45deg); display: flex; align-items: center; justify-content: center; }
+        .auth-logo-inner { width: 16px; height: 16px; background: var(--accent-cyan); }
+        .auth-box h2 { font-size: 22px; margin-bottom: 8px; font-weight: 600; }
+        .auth-box p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+        .auth-input { width: 100%; padding: 12px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; text-align: center; font-size: 16px; margin-bottom: 12px; outline: none; }
+        .auth-input:focus { border-color: var(--accent-cyan); }
+        .auth-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); border: none; border-radius: 8px; color: #000; font-weight: 600; cursor: pointer; }
+
+        /* Main Workspace */
+        #app-workspace { display: none; flex-direction: column; height: 100vh; }
+        
+        /* Top Navigation Bar */
+        .top-bar { background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: 8px 16px; display: flex; align-items: center; gap: 12px; }
+        .tab-bar { display: flex; gap: 6px; flex: 1; overflow-x: auto; }
+        .tab { background: var(--bg-primary); padding: 6px 14px; border-radius: 6px; font-size: 12px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border-color); cursor: pointer; min-width: 120px; max-width: 180px; }
+        .tab.active { background: var(--bg-hover); border-color: var(--accent-cyan); color: var(--accent-cyan); }
+        .tab-close { margin-left: auto; cursor: pointer; opacity: 0.6; }
+        .tab-close:hover { opacity: 1; }
+        .new-tab-btn { background: none; border: 1px solid var(--border-color); color: var(--text-muted); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; }
+
+        /* Address Toolbar */
+        .nav-toolbar { background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: 8px 16px; display: flex; align-items: center; gap: 10px; }
+        .nav-icon-btn { background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; padding: 6px; border-radius: 6px; }
+        .nav-icon-btn:hover { background: var(--bg-hover); color: var(--text-main); }
+        .address-bar-container { flex: 1; display: flex; align-items: center; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 20px; padding: 4px 14px; }
+        .address-bar-container input { flex: 1; background: none; border: none; color: var(--text-main); font-size: 13px; outline: none; padding: 4px; }
+        
+        /* Settings Controls */
+        .controls-group { display: flex; gap: 8px; align-items: center; }
+        .select-custom { background: var(--bg-primary); color: var(--text-muted); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 6px; font-size: 12px; outline: none; }
+
+        /* Viewport Frame Area */
+        .viewport-area { flex: 1; position: relative; width: 100%; height: 100%; }
+        .web-frame { width: 100%; height: 100%; border: none; background: #fff; display: none; }
+        .web-frame.active { display: block; }
+
+        /* Custom Home Landing Screen */
+        .home-landing { position: absolute; inset: 0; background: var(--bg-primary); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+        .home-diamond { width: 60px; height: 60px; border: 2px solid var(--accent-cyan); transform: rotate(45deg); display: flex; align-items: center; justify-content: center; margin-bottom: 30px; box-shadow: 0 0 20px rgba(0, 242, 254, 0.2); }
+        .home-diamond-inner { width: 20px; height: 20px; background: var(--accent-cyan); }
+        .home-title { font-size: 32px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.5px; }
+        .home-subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 35px; }
+        .search-box-large { display: flex; width: 100%; max-width: 580px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-main); padding: 8px 12px; gap: 10px; margin-bottom: 25px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+        .search-box-large input { flex: 1; background: none; border: none; outline: none; color: #fff; font-size: 15px; padding: 6px 8px; }
+        .search-box-large button { background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); border: none; padding: 10px 20px; border-radius: 8px; color: #000; font-weight: 600; cursor: pointer; }
+        .shortcuts-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .shortcut-chip { background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 20px; font-size: 13px; color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s; }
+        .shortcut-chip:hover { border-color: var(--accent-cyan); color: var(--text-main); background: var(--bg-hover); }
+        .footer-note { position: absolute; bottom: 20px; color: var(--text-muted); font-size: 12px; }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <!-- Auth Lock Screen -->
+    <div id="auth-overlay">
+        <div class="auth-box">
+            <div class="auth-logo"><div class="auth-logo-inner"></div></div>
+            <h2>Quantum Network</h2>
+            <p>Enter passcode to unlock secure browsing workspace</p>
+            <input type="password" id="passcode-input" class="auth-input" placeholder="Passcode">
+            <button class="auth-btn" onclick="unlockApp()">Unlock Workspace</button>
+        </div>
+    </div>
+
+    <!-- Main Browser Application -->
+    <div id="app-workspace">
+        
+        <!-- Tab Bar -->
+        <div class="top-bar">
+            <div class="tab-bar" id="tab-container">
+                <div class="tab active" onclick="switchTab(0)" id="tab-0">
+                    <span>New Tab</span>
+                    <span class="tab-close" onclick="closeTab(event, 0)">×</span>
+                </div>
+            </div>
+            <button class="new-tab-btn" onclick="createNewTab()">+</button>
+        </div>
+
+        <!-- Navigation Toolbar -->
+        <div class="nav-toolbar">
+            <button class="nav-icon-btn" onclick="reloadActiveTab()">&#8635;</button>
+            <button class="nav-icon-btn" onclick="goHome()">&#8962;</button>
+            
+            <div class="address-bar-container">
+                <input type="text" id="main-address-bar" placeholder="Search the web or enter a URL" onkeydown="handleAddressSubmit(event)">
+            </div>
+
+            <div class="controls-group">
+                <select class="select-custom" id="search-engine-select">
+                    <option value="google">Google</option>
+                    <option value="duckduckgo">DuckDuckGo</option>
+                    <option value="bing">Bing</option>
+                </select>
+                <select class="select-custom" onchange="changeTheme(this.value)">
+                    <option value="dark">Dark Theme</option>
+                    <option value="emerald">Emerald</option>
+                    <option value="purple">Cyber Purple</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Viewport Container -->
+        <div class="viewport-area" id="viewport-container">
+            
+            <!-- Home Screen -->
+            <div class="home-landing" id="home-screen">
+                <div class="home-diamond"><div class="home-diamond-inner"></div></div>
+                <h1 class="home-title">A quieter way to explore.</h1>
+                <p class="home-subtitle">The web, with room to breathe.</p>
+                
+                <div class="search-box-large">
+                    <input type="text" id="home-search-input" placeholder="Search the web or enter a URL..." onkeydown="handleHomeSubmit(event)">
+                    <button onclick="executeHomeSearch()">Explore</button>
+                </div>
+
+                <div class="shortcuts-row">
+                    <div class="shortcut-chip" onclick="quickNavigate('https://wikipedia.org')">Wikipedia</div>
+                    <div class="shortcut-chip" onclick="quickNavigate('https://github.com')">GitHub</div>
+                    <div class="shortcut-chip" onclick="quickNavigate('https://archive.org')">Internet Archive</div>
+                </div>
+
+                <div class="footer-note">Your browsing session is active. Encrypted sandbox proxy portal.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PASSCODE = "ALI_GATE_NET";
+        let tabs = [{ id: 0, url: 'home', title: 'New Tab' }];
+        let activeTabId = 0;
+        let tabCounter = 1;
+
+        function unlockApp() {
+            const input = document.getElementById('passcode-input').value;
+            if (input === PASSCODE) {
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('app-workspace').style.display = 'flex';
+                loadSession();
+            } else {
+                alert('Incorrect Passcode');
+            }
+        }
+
+        document.getElementById('passcode-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') unlockApp(); });
+
+        function executeHomeSearch() {
+            const query = document.getElementById('home-search-input').value.trim();
+            if (query) navigateActiveTab(query);
+        }
+
+        function handleHomeSubmit(e) { if (e.key === 'Enter') executeHomeSearch(); }
+        function handleAddressSubmit(e) { if (e.key === 'Enter') navigateActiveTab(e.target.value.trim()); }
+
+        function navigateActiveTab(input) {
+            const engine = document.getElementById('search-engine-select').value;
+            let targetUrl = input;
+
+            if (!input.startsWith('http://') && !input.startsWith('https://')) {
+                if (input.includes('.') && !input.includes(' ')) {
+                    targetUrl = 'https://' + input;
+                } else {
+                    if (engine === 'google') targetUrl = `https://www.google.com/search?q=${encodeURIComponent(input)}&igu=1`;
+                    else if (engine === 'duckduckgo') targetUrl = `https://duckduckgo.com/?q=${encodeURIComponent(input)}`;
+                    else targetUrl = `https://www.bing.com/search?q=${encodeURIComponent(input)}`;
+                }
+            }
+
+            const currentTab = tabs.find(t => t.id === activeTabId);
+            currentTab.url = targetUrl;
+            currentTab.title = input.length > 15 ? input.substring(0, 12) + '...' : input;
+
+            renderTabs();
+            renderViewport();
+            saveSession();
+        }
+
+        function quickNavigate(url) {
+            document.getElementById('home-search-input').value = url;
+            navigateActiveTab(url);
+        }
+
+        function createNewTab() {
+            const newId = tabCounter++;
+            tabs.push({ id: newId, url: 'home', title: 'New Tab' });
+            activeTabId = newId;
+            renderTabs();
+            renderViewport();
+            saveSession();
+        }
+
+        function switchTab(id) {
+            activeTabId = id;
+            renderTabs();
+            renderViewport();
+        }
+
+        function closeTab(e, id) {
+            e.stopPropagation();
+            if (tabs.length === 1) return;
+            tabs = tabs.filter(t => t.id !== id);
+            if (activeTabId === id) activeTabId = tabs[tabs.length - 1].id;
+            renderTabs();
+            renderViewport();
+            saveSession();
+        }
+
+        function renderTabs() {
+            const container = document.getElementById('tab-container');
+            container.innerHTML = tabs.map(t => `
+                <div class="tab ${t.id === activeTabId ? 'active' : ''}" onclick="switchTab(${t.id})">
+                    <span>${t.title}</span>
+                    <span class="tab-close" onclick="closeTab(event, ${t.id})">×</span>
+                </div>
+            `).join('');
+        }
+
+        function renderViewport() {
+            const currentTab = tabs.find(t => t.id === activeTabId);
+            const addressBar = document.getElementById('main-address-bar');
+            const homeScreen = document.getElementById('home-screen');
+            
+            document.querySelectorAll('.web-frame').forEach(f => f.classList.remove('active'));
+
+            if (currentTab.url === 'home') {
+                homeScreen.style.display = 'flex';
+                addressBar.value = '';
+            } else {
+                homeScreen.style.display = 'none';
+                addressBar.value = currentTab.url;
+
+                let frame = document.getElementById(`frame-${currentTab.id}`);
+                if (!frame) {
+                    frame = document.createElement('iframe');
+                    frame.id = `frame-${currentTab.id}`;
+                    frame.className = 'web-frame';
+                    document.getElementById('viewport-container').appendChild(frame);
+                }
+                if (frame.src !== currentTab.url) frame.src = currentTab.url;
+                frame.classList.add('active');
+            }
+        }
+
+        function goHome() {
+            const currentTab = tabs.find(t => t.id === activeTabId);
+            currentTab.url = 'home';
+            currentTab.title = 'New Tab';
+            renderTabs();
+            renderViewport();
+        }
+
+        function reloadActiveTab() {
+            const currentTab = tabs.find(t => t.id === activeTabId);
+            if (currentTab.url !== 'home') {
+                const frame = document.getElementById(`frame-${currentTab.id}`);
+                if (frame) frame.src = frame.src;
+            }
+        }
+
+        function changeTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('quantum_theme', theme);
+        }
+
+        function saveSession() {
+            localStorage.setItem('quantum_tabs', JSON.stringify(tabs));
+            localStorage.setItem('quantum_active', activeTabId);
+        }
+
+        function loadSession() {
+            const savedTabs = localStorage.getItem('quantum_tabs');
+            const savedActive = localStorage.getItem('quantum_active');
+            const savedTheme = localStorage.getItem('quantum_theme');
+
+            if (savedTheme) changeTheme(savedTheme);
+            if (savedTabs) {
+                tabs = JSON.parse(savedTabs);
+                activeTabId = parseInt(savedActive) || tabs[0].id;
+                tabCounter = Math.max(...tabs.map(t => t.id)) + 1;
+                renderTabs();
+                renderViewport();
+            }
+        }
+    </script>
+</body>
+                                                                         </html>
+  
