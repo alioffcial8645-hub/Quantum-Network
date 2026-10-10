@@ -79,7 +79,6 @@
             transition: all 0.2s ease; 
         }
 
-        /* Upgraded Luxury Passcode Screen */
         #auth-overlay { 
             position: fixed; 
             inset: 0; 
@@ -282,7 +281,7 @@
             <div class="auth-logo"><div class="auth-logo-inner"></div></div>
             <h2>Quantum Network</h2>
             <p>Secure authentication required</p>
-            <input type="password" id="passcode-input" class="auth-input" placeholder="••••••••••••">
+            <input type="password" id="passcode-input" class="auth-input" placeholder="••••••••••••" onkeydown="if(event.key==='Enter') unlockApp();">
             <button class="auth-btn" onclick="unlockApp()">Unlock Workspace</button>
         </div>
     </div>
@@ -397,4 +396,4 @@
                         <button onclick="executeHomeSearch()">Explore</button>
                     </div>
 
-         
+      
